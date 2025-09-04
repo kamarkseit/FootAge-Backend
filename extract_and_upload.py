@@ -21,22 +21,28 @@ s3 = boto3.client(
 # === STEP 1: Extract 6 Frames at 10s Intervals ===
 timestamps = ['00:00:10', '00:00:20', '00:00:30', '00:00:40', '00:00:50', '00:01:00']
 
+print("🎥 VIDEO_PATH exists:", os.path.exists(VIDEO_PATH))
+
 for i, ts in enumerate(timestamps, start=1):
     frame_path = f'{FRAME_DIR}/frame_{i:02d}.jpg'
+    print("🎥 frame path:", frame_path)
+
     cmd = [
         'ffmpeg', '-ss', ts, '-i', VIDEO_PATH,
         '-frames:v', '1', '-q:v', '2', frame_path
     ]
+
+    print("🛠️ Running command:", ' '.join(cmd))
+    
     subprocess.run(cmd, check=True)
+
     print(f'✅ Extracted frame {i} at {ts}')
 
 print("Files in FRAME_DIR:", os.listdir(FRAME_DIR))
 
-try:
-    files = os.listdir(FRAME_DIR)
-    print("✅ Found files:", files)
-except Exception as e:
-    print(f"❌ os.listdir failed: {e}")
+
+
+
 
 # === STEP 2: Upload Frames to S3 ===
 for filename in os.listdir(FRAME_DIR):
