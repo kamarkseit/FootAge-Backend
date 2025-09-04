@@ -10,7 +10,13 @@ S3_PREFIX = 'uploads/'              # Optional folder path in S3
 
 # === SETUP ===
 os.makedirs(FRAME_DIR, exist_ok=True)
-s3 = boto3.client('s3')
+
+s3 = boto3.client(
+    's3',
+    aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+    aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+    region_name=os.environ['AWS_REGION']
+)
 
 # === STEP 1: Extract 6 Frames at 10s Intervals ===
 timestamps = ['00:00:10', '00:00:20', '00:00:30', '00:00:40', '00:00:50', '00:01:00']
