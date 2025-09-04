@@ -4,7 +4,8 @@ import subprocess
 import sys
 
 app = Flask(__name__)
-CORS(app)  # ✅ This enables cross-origin requests
+CORS(app)
+#CORS(app, resources={r"/upload": {"origins": "https://kamarkseit.github.io"}})  # ✅ This enables cross-origin requests
 
 @app.route('/upload', methods=['POST'])
 def upload_video():
