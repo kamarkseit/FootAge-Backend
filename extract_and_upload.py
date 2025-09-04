@@ -30,6 +30,14 @@ for i, ts in enumerate(timestamps, start=1):
     subprocess.run(cmd, check=True)
     print(f'✅ Extracted frame {i} at {ts}')
 
+print("Files in FRAME_DIR:", os.listdir(FRAME_DIR))
+
+try:
+    files = os.listdir(FRAME_DIR)
+    print("✅ Found files:", files)
+except Exception as e:
+    print(f"❌ os.listdir failed: {e}")
+
 # === STEP 2: Upload Frames to S3 ===
 for filename in os.listdir(FRAME_DIR):
     local_path = os.path.join(FRAME_DIR, filename)
@@ -37,7 +45,7 @@ for filename in os.listdir(FRAME_DIR):
 
     s3_key = f'{S3_PREFIX}{filename}'
     print(f's3_key: {s3_key}')
-    
+
     s3.upload_file(local_path, os.environ['BUCKET_NAME'], s3_key)
     print(f'os.environ[bucket_name]: {os.environ['BUCKET_NAME']}')
 
