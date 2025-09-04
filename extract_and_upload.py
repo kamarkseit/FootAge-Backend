@@ -34,5 +34,6 @@ for i, ts in enumerate(timestamps, start=1):
 for filename in os.listdir(FRAME_DIR):
     local_path = os.path.join(FRAME_DIR, filename)
     s3_key = f'{S3_PREFIX}{filename}'
+    print(f'📤 Attempt to upload {filename} to s3://{BUCKET_NAME}/{s3_key}')
     s3.upload_file(local_path, BUCKET_NAME, s3_key)
     print(f'📤 Uploaded {filename} to s3://{BUCKET_NAME}/{s3_key}')
