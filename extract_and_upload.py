@@ -33,7 +33,12 @@ for i, ts in enumerate(timestamps, start=1):
 # === STEP 2: Upload Frames to S3 ===
 for filename in os.listdir(FRAME_DIR):
     local_path = os.path.join(FRAME_DIR, filename)
+    print(f'Local path: {local_path}')
+
     s3_key = f'{S3_PREFIX}{filename}'
-    print(f'📤 Attempt to upload {filename} to s3://{BUCKET_NAME}/{s3_key}')
-    s3.upload_file(local_path, BUCKET_NAME, s3_key)
+    print(f's3_key: {s3_key}')
+    
+    s3.upload_file(local_path, os.environ['BUCKET_NAME'], s3_key)
+    print(f'os.environ[bucket_name]: {os.environ['BUCKET_NAME']}')
+
     print(f'📤 Uploaded {filename} to s3://{BUCKET_NAME}/{s3_key}')
