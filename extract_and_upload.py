@@ -52,7 +52,7 @@ print("Timestamps: ", timestamps)
 for i, ts in enumerate(timestamps, start=1):
     frame_path = os.path.join(FRAME_DIR, f'frame_{timestamp_str}_{i:02d}.jpg')
     cmd = [
-        'ffmpeg', '-ss', ts, '-i', VIDEO_PATH,
+        'ffmpeg', '-ss', str(ts), '-i', VIDEO_PATH,
         '-frames:v', '1', '-q:v', '2', frame_path
     ]
     subprocess.run(cmd, check=True)
