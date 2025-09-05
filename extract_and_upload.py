@@ -23,36 +23,31 @@ s3 = boto3.client(
 # Get current date and time string once
 timestamp_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
-# Get Video Duration Using ffprobe
-def get_video_duration(video_path):
+# Get Frame Count and Frame Rate
+def get_frame_info(video_path):
     cmd = [
         'ffprobe', '-v', 'error',
-        '-show_format',
+        '-select_streams', 'v:0',
+        '-count_frames',
+        '-show_entries', 'stream=nb_read_frames,r_frame_rate',
         '-of', 'json',
         video_path
     ]
     result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    print("🧾 ffprobe output:", result.stdout)
+    data = json.loads(result.stdout)
+    frames = int(data['streams'][0]['nb_read_frames'])
+    rate = data['streams'][0]['r_frame_rate']
+    fps = eval(rate)  # e.g. '30/1' → 30.0
+    return frames, fps
 
-    try:
-        duration_json = json.loads(result.stdout)
-        duration = float(duration_json['format']['duration'])
-        return duration
-    except (KeyError, ValueError, json.JSONDecodeError) as e:
-        print(f"❌ Failed to get duration: {e}")
-        return None
+# Generate Timestamps Every ~1 Second
+def generate_frame_timestamps(frames, fps):
+    return [i / fps for i in range(0, frames, int(fps))]
 
-
-# Generate Timestamps Every 1 Second
-def generate_timestamps(duration, interval=1):
-    return [f"{int(t // 60):02d}:{int(t % 60):02d}:00" for t in range(0, int(duration), interval)]
-
-
-# === STEP 1: Extract Frames at 1s Intervals ===
-duration = get_video_duration(VIDEO_PATH)
-timestamps = generate_timestamps(duration, interval=1)
-print("Timestamps list is here: ", timestamps)
-
+# === STEP 1: Extract Frames Using ffmpeg ===
+frames, fps = get_frame_info(VIDEO_PATH)
+timestamps = generate_frame_timestamps(frames, fps)
+print("Timestamps: ", timestamps)
 
 for i, ts in enumerate(timestamps, start=1):
     frame_path = os.path.join(FRAME_DIR, f'frame_{timestamp_str}_{i:02d}.jpg')
