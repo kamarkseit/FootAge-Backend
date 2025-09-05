@@ -2,6 +2,7 @@ import subprocess
 import boto3
 import os
 import json
+from datetime import datetime
 
 # === CONFIG ===
 VIDEO_PATH = 'walk_video.mp4'           # Video saved from frontend
@@ -19,37 +20,47 @@ s3 = boto3.client(
     region_name=os.environ['AWS_REGION']
 )
 
+# Get current date and time string once
+timestamp_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
 # Get Video Duration Using ffprobe
 def get_video_duration(video_path):
     cmd = [
         'ffprobe', '-v', 'error',
+        '-select_streams', 'v:0',
         '-show_entries', 'format=duration',
         '-of', 'json',
         video_path
     ]
     result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    duration_json = json.loads(result.stdout)
-    return float(duration_json['format']['duration'])
+    
+    try:
+        duration_json = json.loads(result.stdout)
+        duration = float(duration_json['format']['duration'])
+        return duration
+    except (KeyError, ValueError, json.JSONDecodeError) as e:
+        print(f"❌ Failed to get duration: {e}")
+        return None
 
-# Generate Timestamps Every 5 Seconds
-def generate_timestamps(duration, interval=5):
+
+# Generate Timestamps Every 1 Second
+def generate_timestamps(duration, interval=1):
     return [f"{int(t // 60):02d}:{int(t % 60):02d}:00" for t in range(0, int(duration), interval)]
 
 
-# === STEP 1: Extract Frames at 5s Intervals ===
+# === STEP 1: Extract Frames at 1s Intervals ===
 duration = get_video_duration(VIDEO_PATH)
-timestamps = generate_timestamps(duration, interval=5)
+timestamps = generate_timestamps(duration, interval=1)
 print("Timestamps list is here: ", timestamps)
 
 
 for i, ts in enumerate(timestamps, start=1):
-    frame_path = os.path.join(FRAME_DIR, f'frame_{i:02d}.jpg')
+    frame_path = os.path.join(FRAME_DIR, f'frame_{timestamp_str}_{i:02d}.jpg')
     cmd = [
         'ffmpeg', '-ss', ts, '-i', VIDEO_PATH,
         '-frames:v', '1', '-q:v', '2', frame_path
     ]
     subprocess.run(cmd, check=True)
-    print(f'✅ Extracted frame {i} at {ts}')
 print("📂 Extracted frames list: ", os.listdir(FRAME_DIR))
 
 
