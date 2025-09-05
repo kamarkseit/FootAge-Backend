@@ -1,11 +1,12 @@
 import subprocess
 import boto3
 import os
+import json
 
 # === CONFIG ===
 VIDEO_PATH = 'walk_video.mp4'           # Video saved from frontend
 FRAME_DIR = 'frames'                    # Where extracted frames go
-BUCKET_NAME = 'plastic-bottle-detector-images'     # Replace with your actual bucket
+# BUCKET_NAME = 'plastic-bottle-detector-images'     # Replace with your actual bucket
 S3_PREFIX = 'uploads/'              # Optional folder path in S3
 
 # === SETUP ===
@@ -18,42 +19,47 @@ s3 = boto3.client(
     region_name=os.environ['AWS_REGION']
 )
 
-# === STEP 1: Extract 6 Frames at 10s Intervals ===
-timestamps = ['00:00:01', '00:00:02', '00:00:03']
+# Get Video Duration Using ffprobe
+def get_video_duration(video_path):
+    cmd = [
+        'ffprobe', '-v', 'error',
+        '-show_entries', 'format=duration',
+        '-of', 'json',
+        video_path
+    ]
+    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    duration_json = json.loads(result.stdout)
+    return float(duration_json['format']['duration'])
 
-print("🎥 VIDEO_PATH exists:", os.path.exists(VIDEO_PATH))
+# Generate Timestamps Every 5 Seconds
+def generate_timestamps(duration, interval=5):
+    return [f"{int(t // 60):02d}:{int(t % 60):02d}:00" for t in range(0, int(duration), interval)]
+
+
+# === STEP 1: Extract Frames at 5s Intervals ===
+duration = get_video_duration(VIDEO_PATH)
+timestamps = generate_timestamps(duration, interval=5)
+print("Timestamps list is here: ", timestamps)
+
 
 for i, ts in enumerate(timestamps, start=1):
     frame_path = os.path.join(FRAME_DIR, f'frame_{i:02d}.jpg')
-    #frame_path = f'{FRAME_DIR}/frame_{i:02d}.jpg'
-    print("🎥 frame path:", frame_path)
-
     cmd = [
         'ffmpeg', '-ss', ts, '-i', VIDEO_PATH,
         '-frames:v', '1', '-q:v', '2', frame_path
     ]
-
-    print("🛠️ Running command:", ' '.join(cmd))
-    
     subprocess.run(cmd, check=True)
-
     print(f'✅ Extracted frame {i} at {ts}')
-
-print("Files in FRAME_DIR:", os.listdir(FRAME_DIR))
-
-
-
+print("📂 Extracted frames list: ", os.listdir(FRAME_DIR))
 
 
 # === STEP 2: Upload Frames to S3 ===
 for filename in os.listdir(FRAME_DIR):
     local_path = os.path.join(FRAME_DIR, filename)
-    print(f'Local path: {local_path}')
-
     s3_key = f'{S3_PREFIX}{filename}'
-    print(f's3_key: {s3_key}')
-
     s3.upload_file(local_path, os.environ['BUCKET_NAME'], s3_key)
-    print(f'os.environ[bucket_name]: {os.environ['BUCKET_NAME']}')
 
-    print(f'📤 Uploaded {filename} to s3://{BUCKET_NAME}/{s3_key}')
+print('EXTRACT & UPLOAD COMPLETED !!!')
+
+
+
