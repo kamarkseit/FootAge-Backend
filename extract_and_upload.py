@@ -19,12 +19,13 @@ s3 = boto3.client(
 )
 
 # === STEP 1: Extract 6 Frames at 10s Intervals ===
-timestamps = ['00:00:10', '00:00:20', '00:00:30', '00:00:40', '00:00:50', '00:01:00']
+timestamps = ['00:00:01', '00:00:02', '00:00:03']
 
 print("🎥 VIDEO_PATH exists:", os.path.exists(VIDEO_PATH))
 
 for i, ts in enumerate(timestamps, start=1):
-    frame_path = f'{FRAME_DIR}/frame_{i:02d}.jpg'
+    frame_path = os.path.join(FRAME_DIR, f'frame_{i:02d}.jpg')
+    #frame_path = f'{FRAME_DIR}/frame_{i:02d}.jpg'
     print("🎥 frame path:", frame_path)
 
     cmd = [
