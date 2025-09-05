@@ -34,6 +34,8 @@ def get_video_duration(video_path):
     ]
     result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     
+    print("🧾 ffprobe output:", result.stdout)
+
     try:
         duration_json = json.loads(result.stdout)
         duration = float(duration_json['format']['duration'])
