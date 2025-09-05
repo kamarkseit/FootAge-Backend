@@ -27,13 +27,11 @@ timestamp_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 def get_video_duration(video_path):
     cmd = [
         'ffprobe', '-v', 'error',
-        '-select_streams', 'v:0',
-        '-show_entries', 'format=duration',
+        '-show_format',
         '-of', 'json',
         video_path
     ]
     result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    
     print("🧾 ffprobe output:", result.stdout)
 
     try:
