@@ -3,12 +3,15 @@ import boto3
 import os
 import json
 from datetime import datetime
+import sys
 
 # === CONFIG ===
 VIDEO_PATH = 'walk_video.mp4'           # Video saved from frontend
 FRAME_DIR = 'frames'                    # Where extracted frames go
 # BUCKET_NAME = 'plastic-bottle-detector-images'     # Replace with your actual bucket
 S3_PREFIX = 'uploads/'              # Optional folder path in S3
+id = sys.argv[2]
+print(f"🎬 Processing with ID: {id}")
 
 # === SETUP ===
 os.makedirs(FRAME_DIR, exist_ok=True)
@@ -38,6 +41,7 @@ def get_frame_info(video_path):
     frames = int(data['streams'][0]['nb_read_frames'])
     rate = data['streams'][0]['r_frame_rate']
     fps = eval(rate)  # e.g. '30/1' → 30.0
+
     return frames, fps
 
 # Generate Timestamps Every ~1 Second
@@ -50,7 +54,7 @@ timestamps = generate_frame_timestamps(frames, fps)
 print("Timestamps: ", timestamps)
 
 for i, ts in enumerate(timestamps, start=1):
-    frame_path = os.path.join(FRAME_DIR, f'frame_{timestamp_str}_{i:02d}.jpg')
+    frame_path = os.path.join(FRAME_DIR, f'frame_{id}_{i:02d}.jpg')
     cmd = [
         'ffmpeg', '-ss', str(ts), '-i', VIDEO_PATH,
         '-frames:v', '1', '-q:v', '2', frame_path
