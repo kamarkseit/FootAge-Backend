@@ -10,7 +10,7 @@ VIDEO_PATH = 'walk_video.mp4'           # Video saved from frontend
 FRAME_DIR = 'frames'                    # Where extracted frames go
 # BUCKET_NAME = 'plastic-bottle-detector-images'     # Replace with your actual bucket
 S3_PREFIX = 'uploads/'              # Optional folder path in S3
-id = sys.argv[2]
+id = sys.argv[1]
 print(f"🎬 Processing with ID: {id}")
 
 # === SETUP ===
