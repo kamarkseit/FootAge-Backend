@@ -42,7 +42,7 @@ def get_frame_info(video_path):
 
 # Generate Timestamps Every ~1 Second
 def generate_frame_timestamps(frames, fps):
-    return [i / fps for i in range(0, frames, int(fps)/2)]
+    return [i / fps for i in range(0, frames, int(fps/2))]
 
 # === STEP 1: Extract Frames Using ffmpeg ===
 frames, fps = get_frame_info(VIDEO_PATH)
