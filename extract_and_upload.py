@@ -4,6 +4,8 @@ import os
 import json
 from datetime import datetime
 import sys
+import time
+time.sleep(2) 
 
 # === CONFIG ===
 VIDEO_PATH = 'walk_video.mp4'           # Video saved from frontend
@@ -53,6 +55,7 @@ def generate_frame_timestamps(frames, fps):
 frames, fps = get_frame_info(VIDEO_PATH)
 timestamps = generate_frame_timestamps(frames, fps)
 print("Timestamps: ", timestamps)
+print(f"Found {len(timestamps)} frames to upload.")
 
 for i, ts in enumerate(timestamps, start=1):
     frame_path = os.path.join(id_dir, f'frame_{id}_{i:02d}.jpg')
