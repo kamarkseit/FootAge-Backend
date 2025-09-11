@@ -59,12 +59,12 @@ for i, ts in enumerate(timestamps, start=1):
         '-frames:v', '1', '-q:v', '2', frame_path
     ]
     subprocess.run(cmd, check=True)
-print("📂 Extracted frames list: ", os.listdir(FRAME_DIR))
+print("📂 Extracted frames list: ", os.listdir(id_dir))
 
 
 # === STEP 2: Upload Frames to S3 ===
-for filename in os.listdir(FRAME_DIR):
-    local_path = os.path.join(FRAME_DIR, filename)
+for filename in os.listdir(id_dir):
+    local_path = os.path.join(id_dir, filename)
     s3_key = f'{S3_PREFIX}{filename}'
     s3.upload_file(local_path, os.environ['BUCKET_NAME'], s3_key)
 
