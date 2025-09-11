@@ -40,7 +40,8 @@ def get_frame_info(video_path):
     frames = int(data['streams'][0]['nb_read_frames'])
     rate = data['streams'][0]['r_frame_rate']
     fps = eval(rate)  # e.g. '30/1' → 30.0
-
+    print("frames!!!: ", frames)
+    print("fps!!!: ", fps)
     return frames, fps
 
 # Generate Timestamps Every ~0.5 Second
@@ -48,8 +49,7 @@ def generate_frame_timestamps(frames, fps):
     return [i / fps for i in range(0, frames, int(fps/1.9))]
 
 # === STEP 1: Extract Frames Using ffmpeg ===
-print("frames!!!: ", frames)
-print("fps!!!: ", fps)
+
 frames, fps = get_frame_info(VIDEO_PATH)
 timestamps = generate_frame_timestamps(frames, fps)
 print("Timestamps: ", timestamps)
