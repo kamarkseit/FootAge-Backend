@@ -15,6 +15,8 @@ print(f"🎬 Processing with ID: {id}")
 
 # === SETUP ===
 os.makedirs(FRAME_DIR, exist_ok=True)
+id_dir = os.path.join(FRAME_DIR, id)
+os.makedirs(id_dir, exist_ok=True)
 
 s3 = boto3.client(
     's3',
@@ -22,9 +24,6 @@ s3 = boto3.client(
     aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
     region_name=os.environ['AWS_REGION']
 )
-
-# Get current date and time string once
-timestamp_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
 # Get Frame Count and Frame Rate
 def get_frame_info(video_path):
@@ -44,7 +43,7 @@ def get_frame_info(video_path):
 
     return frames, fps
 
-# Generate Timestamps Every ~1 Second
+# Generate Timestamps Every ~0.5 Second
 def generate_frame_timestamps(frames, fps):
     return [i / fps for i in range(0, frames, int(fps/2))]
 
@@ -54,7 +53,7 @@ timestamps = generate_frame_timestamps(frames, fps)
 print("Timestamps: ", timestamps)
 
 for i, ts in enumerate(timestamps, start=1):
-    frame_path = os.path.join(FRAME_DIR, f'frame_{id}_{i:02d}.jpg')
+    frame_path = os.path.join(id_dir, f'frame_{id}_{i:02d}.jpg')
     cmd = [
         'ffmpeg', '-ss', str(ts), '-i', VIDEO_PATH,
         '-frames:v', '1', '-q:v', '2', frame_path
