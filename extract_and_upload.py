@@ -54,11 +54,12 @@ def generate_frame_timestamps(frames, fps):
 
 frames, fps = get_frame_info(VIDEO_PATH)
 timestamps = generate_frame_timestamps(frames, fps)
+num_of_timestamps = len(timestamps)
 print("Timestamps: ", timestamps)
-print(f"Found {len(timestamps)} frames to upload.")
+print(f"Found {num_of_timestamps} frames to upload.")
 
 for i, ts in enumerate(timestamps, start=1):
-    frame_path = os.path.join(id_dir, f'frame_{id}_{i:02d}.jpg')
+    frame_path = os.path.join(id_dir, f'frame_{id}_{i}-{num_of_timestamps}.jpg')
     cmd = [
         'ffmpeg', '-ss', str(ts), '-i', VIDEO_PATH,
         '-frames:v', '1', '-q:v', '2', frame_path
